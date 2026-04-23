@@ -1,6 +1,7 @@
 package com.example.musicplayer;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -47,7 +48,9 @@ public class PlaylistFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         int layout = android.R.layout.simple_list_item_activated_1;
         if (savedInstanceState != null){
-            playlist = savedInstanceState.getParcelable(PLAY_LIST_KEY, Playlist.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                playlist = savedInstanceState.getParcelable(PLAY_LIST_KEY, Playlist.class);
+            }
         }
         setListAdapter(new ArrayAdapter<String>(requireActivity(),
                 layout, playlist.getTitles()));

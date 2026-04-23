@@ -73,18 +73,24 @@ public class MediaPlayerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Bundle args = getArguments();
+
         if (args != null){
             currentIndex = args.getInt(PLAY_LIST_INDEX_KEY);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 playList = args.getParcelable(PLAY_LIST_KEY, Playlist.class);
                 assert playList != null;
                 shuffleArray = new int[playList.size()];
+                for(int i = 0; i < playList.size(); i++){
+                    shuffleArray[i] = i;
+                }
             }
+
         }
         if (savedInstanceState != null){
             currentState = PlayerState.values()[savedInstanceState.getInt(PLAYER_STATE_KEY)];
             currentIndex = savedInstanceState.getInt(SONG_INDEX_KEY);
             shuffleArray = savedInstanceState.getIntArray(SHUFFLE_ARRAY_STATE_KEY);
+            playList = savedInstanceState.getParcelable(PLAY_LIST_KEY);
             setupControls(view);
             setupMediaPlayer(view);
             setupTimer(view);
@@ -100,13 +106,17 @@ public class MediaPlayerFragment extends Fragment {
                 throw new RuntimeException(e);
             }
 
-        } else{
+        } else {
+            for(int i = 0; i < playList.size(); i++){
+                shuffleArray[i] = i;
+            }
             setupControls(view);
             setupMediaPlayer(view);
             updateCurrentSong(view);
             mediaPlayer.prepareAsync();
             setupTimer(view);
         }
+
 
         // TODO -- we need to check the saved instance for fragment restarts
         super.onViewCreated(view, savedInstanceState);
@@ -238,7 +248,7 @@ public class MediaPlayerFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                mediaPlayer.seekTo(seekBar.getProgress());
             }
 
             @Override
@@ -254,9 +264,6 @@ public class MediaPlayerFragment extends Fragment {
                 if(shuffleSwitch.isChecked()){
                     Log.i(ARRAY_TAG, "BYEEEE");
                     int size = playList.size();
-                    for(int i = 0; i < size; i++){
-                        shuffleArray[i] = i;
-                    }
                     for(int i = 0; i < size; i++){
                         int randNum = 0;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
@@ -276,7 +283,6 @@ public class MediaPlayerFragment extends Fragment {
                     currentIndex = shuffleArray[currentIndex];
                     for(int i = 0; i < shuffleArray.length; i++){
                         shuffleArray[i] = i;
-
                     }
                     Log.i(ARRAY_TAG, Arrays.toString(shuffleArray));
 
@@ -298,6 +304,7 @@ public class MediaPlayerFragment extends Fragment {
         outState.putInt(SONG_INDEX_KEY, currentIndex);
         outState.putInt(CURR_POSITION_KEY, mCurrentPosition);
         outState.putIntArray(SHUFFLE_ARRAY_STATE_KEY, shuffleArray);
+        outState.putParcelable(PLAY_LIST_KEY, playList);
         super.onSaveInstanceState(outState);
     }
 
